@@ -3,15 +3,15 @@ require_relative 'thinkable'
 class Player
   include Thinkable
 
-  attr_accessor :mark, :name
+  attr_accessor :mark, :name, :placed
 
-  def initialize(name, mark = '')
+  def initialize(name, mark = nil)
     self.name = name
     self.mark = mark
+    self.placed = []
   end
 
-  def designate_marker(choice)
-    avail_markers = get_marker_choices
-    self.mark = avail_markers[choice]
+  def update_token_locations(position)
+    self.placed.push(position)
   end
 end

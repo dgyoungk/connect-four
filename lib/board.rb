@@ -7,7 +7,7 @@ class Board
   end
 
   def grid_init
-    game_grid = 42.times.with_object(Hash.new) { |n, hash| hash[n + 1] = ' ' }
+    game_grid = 42.times.with_object(Hash.new) { |n, hash| hash[n + 1] = "\u25EF" }
   end
 
   def update_grid(player, position)
