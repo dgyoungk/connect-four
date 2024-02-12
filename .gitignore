@@ -1,0 +1,5 @@
+# ignore testing file
+testing.rb
+
+#ignore debugging config
+.vscode
