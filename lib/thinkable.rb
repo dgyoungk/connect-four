@@ -36,7 +36,7 @@ module Thinkable
     return "\u25EF"
   end
 
-  def get_marker_choices
+  def get_token_choices
     return { "red" => "\u24C7", 'yellow' => "\u24CE" }
   end
 
@@ -50,7 +50,7 @@ module Thinkable
 
   def get_grid_position(grid)
     grid_position_msg
-    player_choice = gets.chomp.to_i
+    player_choice = gets.to_i
     until position_verified?(player_choice, grid)
       error_msg
       grid_position_msg
@@ -59,14 +59,15 @@ module Thinkable
   end
 
   def position_verified?(position, grid)
+    tokens = get_token_choices.values
     unless position.between?(1, 7)
-      return grid[position - 7] != player1.mark && grid[position- - 7] != player2.mark
+      return grid[position - 7] == tokens.first || grid[position - 7] == tokens.last
     else
       true
     end
   end
 
-  def check_p_win(player)
+  def player_won?(player)
     win_combos = get_game_win_cons
     win_combos.any? { |combo| combo.intersection(player.placed) == combo }
   end

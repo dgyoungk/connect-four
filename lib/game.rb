@@ -33,7 +33,7 @@ class Game
   end
 
   def assign_player(username)
-    avail_markers = get_marker_choices.values
+    avail_markers = get_token_choices.values
     if player1.nil? || player2.nil?
       player1.nil? ? self.player1 = Player.new(username, avail_markers.first) : self.player2 = Player.new(username, avail_markers.last)
     end
@@ -69,8 +69,8 @@ class Game
   end
 
   def check_game_status
-    p1_won = check_p_win(player1)
-    p2_won = check_p_win(player2)
+    p1_won = player_won?(player1)
+    p2_won = player_won?(player2)
     if p1_won
       self.match_finished = true
       winner_msg(player1.name)
