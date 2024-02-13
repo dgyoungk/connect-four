@@ -7,7 +7,7 @@ class Game
   include Displayable
   include Thinkable
 
-  attr_accessor :player1, :player2, :board, :replay, :match_finished, :turn
+  attr_accessor :player1, :player2, :board, :replay, :match_finished, :turn, :win_combos
 
   def initialize
     self.player1 = nil
@@ -22,7 +22,6 @@ class Game
     welcome_msg
     2.times { create_player }
     rules_msg
-    grid_information_msg
     start_game
   end
 
@@ -59,6 +58,7 @@ class Game
       check_game_status
       self.turn += 1
     end
+    display_grid(board.grid)
   end
 
   # condition that checks whether a token exists below the position indicated by grid_pos in get_grid_position
@@ -69,8 +69,9 @@ class Game
   end
 
   def check_game_status
-    p1_won = player_won?(player1)
-    p2_won = player_won?(player2)
+    self.win_combos = get_game_win_cons
+    p1_won = player_won?(player1, win_combos)
+    p2_won = player_won?(player2, win_combos)
     if p1_won
       self.match_finished = true
       winner_msg(player1.name)
@@ -97,5 +98,6 @@ class Game
     self.replay = true
     self.match_finished = false
     board.reset_grid
+    another_round_msg
   end
 end
