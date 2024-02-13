@@ -7,7 +7,7 @@ class Game
   include Displayable
   include Thinkable
 
-  attr_accessor :player1, :player2, :board, :replay, :match_finished, :turns
+  attr_accessor :player1, :player2, :board, :replay, :match_finished, :turn
 
   def initialize
     self.player1 = nil
@@ -15,7 +15,7 @@ class Game
     self.board = Board.new
     self.replay = true
     self.match_finished = false
-    self.turns = 1
+    self.turn = 1
   end
 
   def setup
@@ -40,24 +40,24 @@ class Game
   end
 
   def start_game
-    while game_replay?
+    while replay_game?
       play_once
       prompt_replay
       game_end
     end
   end
 
-  def game_replay?
+  def replay_game?
     return replay
   end
 
   def play_once
     until match_finished || grid_filled?(board.grid)
       display_grid(board.grid)
-      turns.odd? ? turn_msg(player1.name) : turn_msg(player2.name)
-      turns.odd? ? place_token(player1) : place_token(player2)
-      game_over?
-      self.turns += 1
+      turn.odd? ? turn_msg(player1.name) : turn_msg(player2.name)
+      turn.odd? ? place_token(player1) : place_token(player2)
+      check_game_status
+      self.turn += 1
     end
   end
 
@@ -68,25 +68,24 @@ class Game
     player.update_token_locations(pos_choice)
   end
 
-  def game_over?
+  def check_game_status
     p1_won = check_p_win(player1)
     p2_won = check_p_win(player2)
     if p1_won
+      self.match_finished = true
       winner_msg(player1.name)
-      match_finished = true
     elsif p2_won
+      self.match_finished = true
       winner_msg(player2.name)
-      match_finished = true
     elsif grid_filled?(board.grid)
+      self.match_finished = true
       game_draw_msg
-      match_finished = true
     end
   end
 
-  # TODO: implement game-resetting and game-winning condition checking
   def prompt_replay
     replay_choice = get_decision
-    replay = false if replay_choice == 'n'
+    self.replay = false if replay_choice == 'n'
   end
 
   def game_end
@@ -94,7 +93,7 @@ class Game
   end
 
   def game_reset
-    self.turns = 1
+    self.turn = 1
     self.replay = true
     self.match_finished = false
     board.reset_grid
