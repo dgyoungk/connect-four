@@ -32,10 +32,6 @@ module Thinkable
     win_cons
   end
 
-  def empty_token
-    return "\u25EF"
-  end
-
   def get_token_choices
     return { "red" => "\u24C7", 'yellow' => "\u24CE" }
   end
@@ -45,7 +41,7 @@ module Thinkable
   end
 
   def grid_filled?(grid)
-    return grid.all? { |k, v| v != empty_token }
+    return grid.all? { |k, v| v != k }
   end
 
   def get_grid_position(grid)
@@ -54,22 +50,22 @@ module Thinkable
     until position_verified?(player_choice, grid)
       error_msg
       grid_position_msg
+      player_choice = gets.to_i
     end
     player_choice
   end
 
   def position_verified?(position, grid)
     tokens = get_token_choices.values
-    unless position.between?(1, 7)
-      return grid[position - 7] == tokens.first || grid[position - 7] == tokens.last
+    unless position.between?(36, 42)
+      return grid[position + 7] == %(#{tokens.first} ) || grid[position + 7] == %(#{tokens.last} )
     else
       true
     end
   end
 
-  def player_won?(player)
-    win_combos = get_game_win_cons
-    win_combos.any? { |combo| combo.intersection(player.placed) == combo }
+  def player_won?(player, combos)
+    combos.any? { |win_con| win_con.intersection(player.placed) == win_con }
   end
 
   def get_decision
@@ -78,6 +74,7 @@ module Thinkable
     until decision_verified?(decision)
       error_msg
       replay_msg
+      decision = gets.chomp.downcase
     end
     decision
   end
