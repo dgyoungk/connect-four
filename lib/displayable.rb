@@ -1,5 +1,7 @@
-module Displayable
+# frozen_string_literal: false
 
+# ./lib/displayable.rb
+module Displayable
   def welcome_msg
     puts %(Connect 4: a classic game! Let's play!!!)
   end
@@ -11,11 +13,6 @@ module Displayable
     puts %(You can only place tokens at the bottom of the board or on top of a placed token)
   end
 
-  # def grid_information_msg
-  #   puts %(\nEach spot in the board can be indicated with numbers, from 1 to 42)
-  #   puts %(1 is the top-left corner, and 42 is the bottom-right corner)
-  # end
-
   def new_player_msg
     print %(\nPlayer username: )
   end
@@ -23,16 +20,17 @@ module Displayable
   def display_grid(grid)
     puts
     43.times do |n|
-      next if n == 0
+      next if n.zero?
+
       digit_print(grid, n)
     end
   end
 
   def digit_print(grid, num)
-    if (num) % 7 == 0
+    if (num % 7).zero?
       print %( #{grid[num]} |\n)
-    elsif (num) % 7 == 1
-      print "|" + %( #{grid[num]} |)
+    elsif num % 7 == 1
+      print %(| #{grid[num]} |)
     else
       print %( #{grid[num]} |)
     end
@@ -49,7 +47,7 @@ module Displayable
   def error_msg
     puts %(\nInvalid option, try again)
   end
-  # TODO: implement rest of the in-game messages
+
   def replay_msg
     print %(\nWould you like to play again? (y/n): )
   end

@@ -1,8 +1,11 @@
+# frozen_string_literal: false
+
 require_relative 'displayable'
 require_relative 'board'
 require_relative 'thinkable'
 require_relative 'player'
 
+# ./lib/game.rb
 class Game
   include Displayable
   include Thinkable
@@ -32,9 +35,15 @@ class Game
   end
 
   def assign_player(username)
-    avail_markers = get_token_choices.values
-    if player1.nil? || player2.nil?
-      player1.nil? ? self.player1 = Player.new(username, avail_markers.first) : self.player2 = Player.new(username, avail_markers.last)
+    avail_markers = token_choices.values
+    return unless player1.nil? || player2.nil?
+
+    if player1.nil?
+      self.player1 = Player.new(username,
+                                avail_markers.first)
+    else
+      self.player2 = Player.new(username,
+                                avail_markers.last)
     end
   end
 
@@ -47,7 +56,7 @@ class Game
   end
 
   def replay_game?
-    return replay
+    replay
   end
 
   def play_once
@@ -61,15 +70,15 @@ class Game
     display_grid(board.grid)
   end
 
-  # condition that checks whether a token exists below the position indicated by grid_pos in get_grid_position
+  # condition that checks whether a token exists below the position indicated by grid_pos in user_grid_position
   def place_token(player)
-    pos_choice = get_grid_position(board.grid)
+    pos_choice = user_grid_position(board.grid)
     board.update_grid(player, pos_choice)
     player.update_token_locations(pos_choice)
   end
 
   def check_game_status
-    self.win_combos = get_game_win_cons
+    self.win_combos = game_win_cons
     p1_won = player_won?(player1, win_combos)
     p2_won = player_won?(player2, win_combos)
     if p1_won
@@ -85,7 +94,7 @@ class Game
   end
 
   def prompt_replay
-    replay_choice = get_decision
+    replay_choice = user_decision
     self.replay = false if replay_choice == 'n'
   end
 
@@ -97,8 +106,8 @@ class Game
     self.turn = 1
     self.replay = true
     self.match_finished = false
-    self.player1.placed = []
-    self.player2.placed = []
+    player1.placed = []
+    player2.placed = []
     board.reset_grid
     another_round_msg
   end

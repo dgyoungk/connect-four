@@ -1,5 +1,7 @@
-class Board
+# frozen_string_literal: false
 
+# ./lib/board.rb
+class Board
   attr_accessor :grid
 
   def initialize
@@ -7,13 +9,14 @@ class Board
   end
 
   def grid_init
-    game_grid = 43.times.with_object(Hash.new) do |n, hash|
-      next if n == 0
-      if n <= 9
-        hash[n] = %(0#{n})
-      else
-        hash[n] = n.to_s
-      end
+    43.times.with_object({}) do |n, hash|
+      next if n.zero?
+
+      hash[n] = if n <= 9
+                  %(0#{n})
+                else
+                  n.to_s
+                end
     end
   end
 
