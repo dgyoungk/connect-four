@@ -1,2 +1,3 @@
-# connect-four
-TOP FS Ruby TTD Project: Connect Four
+# TOP FS Ruby TTD Project: Connect Four
+
+Author: Daniel Kwon 2024
