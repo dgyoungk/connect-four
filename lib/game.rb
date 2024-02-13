@@ -97,6 +97,8 @@ class Game
     self.turn = 1
     self.replay = true
     self.match_finished = false
+    self.player1.placed = []
+    self.player2.placed = []
     board.reset_grid
     another_round_msg
   end

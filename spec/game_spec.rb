@@ -13,6 +13,7 @@ describe Game do
       allow(new_game).to receive(:new_player_msg)
       allow(new_game).to receive(:grid_position_msg)
       allow(new_game).to receive(:another_round_msg)
+
     end
 
     context 'when method is called' do
@@ -100,6 +101,7 @@ describe Game do
         allow(new_game).to receive(:replay_game?).and_return(true, false)
         allow(new_game).to receive(:goodbye_msg)
         allow(new_game).to receive(:another_round_msg)
+        allow(new_game).to receive(:game_reset)
       end
       it 'triggers #play_once' do
         expect(new_game).to receive(:play_once)
@@ -214,7 +216,7 @@ describe Game do
   end
 
   describe '#get_grid_position' do
-    let(:player_position) { 25 }
+    let(:player_position) { "25" }
     before do
       allow(new_game).to receive(:grid_position_msg)
       allow(new_game).to receive(:error_msg)
@@ -472,6 +474,8 @@ describe Game do
         new_game.instance_variable_set(:@turn, 14)
         new_game.instance_variable_set(:@replay, false)
         new_game.instance_variable_set(:@match_finished, true)
+        new_game.instance_variable_set(:@player1, Player.new("G1", nil, [1, 4, 5, 6, 7, 8]))
+        new_game.instance_variable_set(:@player2, Player.new("KH", nil, [23, 25, 29, 30, 2]))
       end
       it "resets the game's turn count to 1" do
         expect { new_game.game_reset }.to change { new_game.turn }.to 1
@@ -485,6 +489,12 @@ describe Game do
       it 'triggers #reset_grid on the game board' do
         expect(new_game.board).to receive(:reset_grid)
         new_game.game_reset
+      end
+      it "clears player 1's placed array" do
+        expect { new_game.game_reset }.to change { new_game.player1.placed }.to []
+      end
+      it "clears player 2's placed array" do
+        expect { new_game.game_reset }.to change { new_game.player2.placed }.to []
       end
     end
   end
