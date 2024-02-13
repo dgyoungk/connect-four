@@ -1,4 +1,6 @@
-require './lib/game.rb'
+# frozen_string_literal: false
+
+require './lib/game'
 
 describe Game do
   subject(:new_game) { described_class.new }
@@ -13,7 +15,6 @@ describe Game do
       allow(new_game).to receive(:new_player_msg)
       allow(new_game).to receive(:grid_position_msg)
       allow(new_game).to receive(:another_round_msg)
-
     end
 
     context 'when method is called' do
@@ -37,7 +38,7 @@ describe Game do
   end
 
   describe '#create_player' do
-    let(:newcomer) { double('newcomer', name: "dummy") }
+    let(:newcomer) { double('newcomer', name: 'dummy') }
     before do
       allow(new_game).to receive(:gets).and_return(newcomer.name)
       allow(new_game).to receive(:new_player_msg)
@@ -58,7 +59,7 @@ describe Game do
 
       context 'and player 1 is already created' do
         before do
-          new_game.instance_variable_set(:@player1, Player.new("Jojo"))
+          new_game.instance_variable_set(:@player1, Player.new('Jojo'))
         end
         it 'creates player 2' do
           new_game.create_player
@@ -69,7 +70,6 @@ describe Game do
   end
 
   describe '#assign_player' do
-    let(:tokens) { double("marker_choices", black: "\u25EF", white: "\u25C9") }
     let(:jayce) { double('jayce', name: 'jayce') }
     context 'when players are being assigned a token' do
       context 'and there are no players in the game' do
@@ -81,7 +81,7 @@ describe Game do
 
       context 'and a player already exists' do
         before do
-          new_game.instance_variable_set(:@player1, Player.new("Jojo"))
+          new_game.instance_variable_set(:@player1, Player.new('Jojo'))
         end
         it 'assigns a token to player 2' do
           new_game.assign_player(jayce.name)
@@ -91,13 +91,12 @@ describe Game do
     end
   end
 
-  # TODO: debug tests related to #start_game and #play_once
   describe '#start_game' do
     context 'when replay is true' do
       before do
         decision = 'n'
         allow(new_game).to receive(:play_once)
-        allow(new_game).to receive(:get_decision).and_return(decision)
+        allow(new_game).to receive(:user_decision).and_return(decision)
         allow(new_game).to receive(:replay_game?).and_return(true, false)
         allow(new_game).to receive(:goodbye_msg)
         allow(new_game).to receive(:another_round_msg)
@@ -161,7 +160,7 @@ describe Game do
         new_game.play_once
       end
       it 'turn increments by 1' do
-        expect { new_game.play_once }.to change { new_game.turn }.to (2)
+        expect { new_game.play_once }.to change { new_game.turn }.to(2)
       end
     end
   end
@@ -181,7 +180,7 @@ describe Game do
 
       context 'when the grid has no empty slots' do
         before do
-          new_game.board.grid.each { |k, v| v = token }
+          new_game.board.grid.each { |_k, _v| token }
         end
         it 'returns true' do
           expect(new_game).to receive(:grid_filled?).with(new_game.board.grid).and_return true
@@ -196,12 +195,12 @@ describe Game do
       let(:dummy_position) { 40 }
       before do
         new_game.instance_variable_set(:@player1, Player.new('dummy'))
-        allow(new_game).to receive(:get_grid_position).with(new_game.board.grid).and_return(dummy_position)
+        allow(new_game).to receive(:user_grid_position).with(new_game.board.grid).and_return(dummy_position)
         allow(new_game.board).to receive(:update_grid).with(new_game.player1, dummy_position)
         allow(new_game.player1).to receive(:update_token_locations).with(dummy_position)
       end
-      it 'triggers #get_grid_position' do
-        expect(new_game).to receive(:get_grid_position).with(new_game.board.grid)
+      it 'triggers #user_grid_position' do
+        expect(new_game).to receive(:user_grid_position).with(new_game.board.grid)
         new_game.place_token(new_game.player1)
       end
       it 'triggers update_grid on the board' do
@@ -215,8 +214,8 @@ describe Game do
     end
   end
 
-  describe '#get_grid_position' do
-    let(:player_position) { "25" }
+  describe '#user_grid_position' do
+    let(:player_position) { '25' }
     before do
       allow(new_game).to receive(:grid_position_msg)
       allow(new_game).to receive(:error_msg)
@@ -227,17 +226,18 @@ describe Game do
     context 'when method executes' do
       it 'triggers #grid_position_msg at least once' do
         expect(new_game).to receive(:grid_position_msg).at_least(1).time
-        new_game.get_grid_position(new_game.board.grid)
+        new_game.user_grid_position(new_game.board.grid)
       end
     end
 
-    context 'when #position_verified? returns false twice' do
+    context 'when #position_verified? returns false once' do
       before do
-      allow(new_game).to receive(:position_verified?).with(player_position, new_game.board.grid).and_return false, false, true
+        allow(new_game).to receive(:position_verified?).with(player_position, new_game.board.grid).and_return false,
+                                                                                                              true
       end
       it 'triggers #error_msg once' do
-        expect(new_game).to receive(:error_msg).twice
-        new_game.get_grid_position(new_game.board.grid)
+        expect(new_game).to receive(:error_msg).once
+        new_game.user_grid_position(new_game.board.grid)
       end
     end
 
@@ -246,7 +246,7 @@ describe Game do
         allow(new_game).to receive(:position_verified?).with(player_position, new_game.board.grid).and_return true
       end
       it 'returns the player input' do
-        result = new_game.get_grid_position(new_game.board.grid)
+        result = new_game.user_grid_position(new_game.board.grid)
         expect(result).to eq(player_position)
       end
     end
@@ -265,7 +265,7 @@ describe Game do
       end
     end
 
-    context "when the chosen spot is less than 36" do
+    context 'when the chosen spot is less than 36' do
       let(:stacking_token) { 21 }
       context 'and a token is underneath the specified position' do
         before do
@@ -287,10 +287,10 @@ describe Game do
   end
 
   describe '#check_game_status' do
-    let(:combos_double) { new_game.get_game_win_cons }
+    let(:combos_double) { new_game.game_win_cons }
     before do
-      new_game.instance_variable_set(:@player1, Player.new("wingus"))
-      new_game.instance_variable_set(:@player2, Player.new("dingus"))
+      new_game.instance_variable_set(:@player1, Player.new('wingus'))
+      new_game.instance_variable_set(:@player2, Player.new('dingus'))
       allow(new_game).to receive(:game_draw_msg)
       allow(new_game).to receive(:winner_msg).with(new_game.player1.name)
       allow(new_game).to receive(:winner_msg).with(new_game.player2.name)
@@ -300,8 +300,8 @@ describe Game do
       before do
         allow(new_game).to receive(:grid_filled?).with(new_game.board.grid)
       end
-      it 'populates win_combos with #get_game_win_cons' do
-        expect { new_game.check_game_status }.to change { new_game.win_combos }.to (combos_double)
+      it 'populates win_combos with #game_win_cons' do
+        expect { new_game.check_game_status }.to change { new_game.win_combos }.to(combos_double)
       end
       it 'triggers #player_won? for player 1' do
         allow(new_game).to receive(:player_won?).with(new_game.player2, combos_double)
@@ -351,7 +351,7 @@ describe Game do
   end
 
   describe '#player_won?' do
-    let(:combos_double) { new_game.get_game_win_cons }
+    let(:combos_double) { new_game.game_win_cons }
 
     context 'when a player has a winning combo' do
       before do
@@ -376,7 +376,7 @@ describe Game do
     context 'when a player has a winning combo among other tokens' do
       let(:player_combo) { [1, 3, 6, 9, 15, 17, 25, 30] }
       before do
-        new_game.instance_variable_set(:@player1, Player.new("PJH", nil, player_combo))
+        new_game.instance_variable_set(:@player1, Player.new('PJH', nil, player_combo))
       end
       it 'still returns true' do
         expect(new_game).to receive(:player_won?).with(new_game.player1, combos_double).and_return true
@@ -397,8 +397,8 @@ describe Game do
       before do
         allow(new_game).to receive(:decision_verified?).with(player_choice).and_return true
       end
-      it 'triggers #get_decision' do
-        expect(new_game).to receive(:get_decision)
+      it 'triggers #user_decision' do
+        expect(new_game).to receive(:user_decision)
         new_game.prompt_replay
       end
     end
@@ -410,7 +410,7 @@ describe Game do
     end
   end
 
-  describe '#get_decision' do
+  describe '#user_decision' do
     let(:player_decision) { 'n' }
     before do
       allow(new_game).to receive(:replay_msg)
@@ -421,7 +421,7 @@ describe Game do
     context 'when method executes' do
       it 'triggers #replay_msg at least once' do
         expect(new_game).to receive(:replay_msg).at_least(1).time
-        new_game.get_decision
+        new_game.user_decision
       end
     end
 
@@ -431,7 +431,7 @@ describe Game do
       end
       it 'triggers #error_msg twice' do
         expect(new_game).to receive(:error_msg).twice
-        new_game.get_decision
+        new_game.user_decision
       end
     end
 
@@ -440,7 +440,7 @@ describe Game do
         allow(new_game).to receive(:decision_verified?).with(player_decision).and_return true
       end
       it 'returns the player input' do
-        result = new_game.get_decision
+        result = new_game.user_decision
         expect(result).to eq player_decision
       end
     end
@@ -466,24 +466,22 @@ describe Game do
   end
 
   describe '#game_reset' do
-    before do
-      allow(new_game).to receive(:another_round_msg)
-    end
     context 'when method executes' do
       before do
         new_game.instance_variable_set(:@turn, 14)
         new_game.instance_variable_set(:@replay, false)
         new_game.instance_variable_set(:@match_finished, true)
-        new_game.instance_variable_set(:@player1, Player.new("G1", nil, [1, 4, 5, 6, 7, 8]))
-        new_game.instance_variable_set(:@player2, Player.new("KH", nil, [23, 25, 29, 30, 2]))
+        new_game.instance_variable_set(:@player1, Player.new('G1', nil, [1, 4, 5, 6, 7, 8]))
+        new_game.instance_variable_set(:@player2, Player.new('KH', nil, [23, 25, 29, 30, 2]))
+        allow(new_game).to receive(:another_round_msg)
       end
       it "resets the game's turn count to 1" do
         expect { new_game.game_reset }.to change { new_game.turn }.to 1
       end
-      it "resets the replay flag" do
+      it 'resets the replay flag' do
         expect { new_game.game_reset }.to change { new_game.replay }.to true
       end
-      it "resets the match_finished flag" do
+      it 'resets the match_finished flag' do
         expect { new_game.game_reset }.to change { new_game.match_finished }.to false
       end
       it 'triggers #reset_grid on the game board' do
