@@ -11,7 +11,7 @@ module Displayable
     puts %(You can only place tokens at the bottom of the board or on top of a placed token)
   end
 
-  def grid_position_msg
+  def grid_information_msg
     puts %(Each spot in the board can be indicated with numbers, from 1 to 42)
     puts %(1 is the top-left corner, and 42 is the bottom-right corner)
   end
@@ -44,4 +44,19 @@ module Displayable
     puts %(Invalid option, try again)
   end
   # TODO: implement rest of the in-game messages
+  def replay_msg
+    print %(Would you like to play again? (y/n): )
+  end
+
+  def winner_msg(name)
+    puts %(#{name} wins!!!)
+  end
+
+  def game_draw_msg
+    puts %(Neither player got 4 in a row, it's a draw)
+  end
+
+  def goodbye_msg
+    puts %(Thanks for playing, till next time!)
+  end
 end
