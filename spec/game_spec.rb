@@ -92,6 +92,7 @@ describe Game do
         allow(new_game).to receive(:play_once)
         allow(new_game).to receive(:get_decision).and_return(decision)
         allow(new_game).to receive(:replay_game?).and_return(true, false)
+        allow(new_game).to receive(:goodbye_msg)
       end
       it 'triggers #play_once' do
         expect(new_game).to receive(:play_once)
@@ -203,6 +204,71 @@ describe Game do
     end
   end
 
+  describe '#get_grid_position' do
+    let(:player_position) { 25 }
+    before do
+      allow(new_game).to receive(:grid_position_msg)
+      allow(new_game).to receive(:error_msg)
+      allow(new_game).to receive(:gets).and_return(player_position)
+      allow(new_game).to receive(:position_verified?).with(player_position, new_game.board.grid).and_return true
+    end
+    context 'when method executes' do
+      it 'triggers #grid_position_msg at least once' do
+        expect(new_game).to receive(:grid_position_msg).at_least(1).time
+        new_game.get_grid_position(new_game.board.grid)
+      end
+    end
+    context 'when #position_verified? returns false twice' do
+      before do
+      allow(new_game).to receive(:position_verified?).with(player_position, new_game.board.grid).and_return false, false, true
+      end
+      it 'triggers #error_msg once' do
+        expect(new_game).to receive(:error_msg).twice
+        new_game.get_grid_position(new_game.board.grid)
+      end
+    end
+    context 'when #position_verified? returns true' do
+      before do
+        allow(new_game).to receive(:position_verified?).with(player_position, new_game.board.grid).and_return true
+      end
+      it 'returns the player input' do
+        result = new_game.get_grid_position(new_game.board.grid)
+        expect(result).to eq(player_position)
+      end
+    end
+  end
+
+  describe '#position_verified?' do
+    let(:token_position) { 4 }
+    context 'when the chosen spot is between 1 and 7' do
+      before do
+        allow(new_game).to receive(:position_verified?).with(token_position, new_game.board.grid).and_return true
+      end
+      it 'returns true' do
+        result = new_game.position_verified?(token_position, new_game.board.grid)
+        expect(result).to be true
+      end
+    end
+    context "when the chosen spot is higher than 7" do
+      let(:stacking_token) { 21 }
+      context 'and a token is underneath the specified position' do
+        before do
+          new_game.board.grid[stacking_token - 7] = "\u24C7"
+        end
+        it 'returns true' do
+          result = new_game.position_verified?(stacking_token, new_game.board.grid)
+          expect(result).to be true
+        end
+      end
+      context 'and a token is not underneath the specified position' do
+        it 'returns false' do
+          result = new_game.position_verified?(stacking_token, new_game.board.grid)
+          expect(result).to be false
+        end
+      end
+    end
+  end
+
   describe '#check_game_status' do
     before do
       new_game.instance_variable_set(:@player1, Player.new("wingus"))
@@ -215,14 +281,14 @@ describe Game do
       before do
         allow(new_game).to receive(:grid_filled?).with(new_game.board.grid)
       end
-      it 'triggers #check_p_win for player 1' do
-        allow(new_game).to receive(:check_p_win).with(new_game.player2)
-        expect(new_game).to receive(:check_p_win).with(new_game.player1)
+      it 'triggers #player_won? for player 1' do
+        allow(new_game).to receive(:player_won?).with(new_game.player2)
+        expect(new_game).to receive(:player_won?).with(new_game.player1)
         new_game.check_game_status
       end
       it 'and for player 2' do
-        allow(new_game).to receive(:check_p_win).with(new_game.player1)
-        expect(new_game).to receive(:check_p_win).with(new_game.player2)
+        allow(new_game).to receive(:player_won?).with(new_game.player1)
+        expect(new_game).to receive(:player_won?).with(new_game.player2)
         new_game.check_game_status
       end
     end
@@ -236,8 +302,8 @@ describe Game do
       end
       context 'when player 1 wins' do
         before do
-          allow(new_game).to receive(:check_p_win).with(new_game.player1).and_return true
-          allow(new_game).to receive(:check_p_win).with(new_game.player2).and_return false
+          allow(new_game).to receive(:player_won?).with(new_game.player1).and_return true
+          allow(new_game).to receive(:player_won?).with(new_game.player2).and_return false
         end
         it "triggers #winner_msg with player 1's name" do
           expect(new_game).to receive(:winner_msg).with(new_game.player1.name)
@@ -246,8 +312,8 @@ describe Game do
       end
       context 'when player 2 wins' do
         before do
-          allow(new_game).to receive(:check_p_win).with(new_game.player1).and_return false
-          allow(new_game).to receive(:check_p_win).with(new_game.player2).and_return true
+          allow(new_game).to receive(:player_won?).with(new_game.player1).and_return false
+          allow(new_game).to receive(:player_won?).with(new_game.player2).and_return true
         end
         it "triggers #winner_msg with player 2's name" do
           expect(new_game).to receive(:winner_msg).with(new_game.player2.name)
@@ -259,6 +325,8 @@ describe Game do
       end
     end
   end
+
+  # TODO: add test for #player_won? method
 
   describe '#prompt_replay' do
     let(:player_choice) { 'n' }
@@ -282,6 +350,40 @@ describe Game do
       end
     end
   end
+
+  describe '#get_decision' do
+    let(:player_decision) { 'n' }
+    before do
+      allow(new_game).to receive(:replay_msg)
+      allow(new_game).to receive(:error_msg)
+      allow(new_game).to receive(:gets).and_return(player_decision)
+    end
+    context 'when method executes' do
+      it 'triggers #replay_msg at least once' do
+        expect(new_game).to receive(:replay_msg).at_least(1).time
+        new_game.get_decision
+      end
+    end
+    context 'when #decision_verified? returns false twice' do
+      before do
+        allow(new_game).to receive(:decision_verified?).with(player_decision).and_return false, false, true
+      end
+      it 'triggers #error_msg twice' do
+        expect(new_game).to receive(:error_msg).twice
+        new_game.get_decision
+      end
+    end
+    context 'when #decision_verified? returns true' do
+      before do
+        allow(new_game).to receive(:decision_verified?).with(player_decision).and_return true
+      end
+      it 'returns the player input' do
+        result = new_game.get_decision
+        expect(result).to eq player_decision
+      end
+    end
+  end
+
   describe '#game_end' do
     context 'when the replay flag is not changed' do
       it 'triggers #game_reset' do
