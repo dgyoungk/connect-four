@@ -41,26 +41,36 @@ module Thinkable
   end
 
   def grid_filled?(grid)
-    return grid.all? { |k, v| v != k }
+    return grid.all? do |k, v|
+      if k < 10
+        v != %(0#{k})
+      else
+        v != k.to_s
+      end
+    end
   end
 
   def get_grid_position(grid)
     grid_position_msg
-    player_choice = gets.to_i
+    player_choice = gets.chomp
     until position_verified?(player_choice, grid)
       error_msg
       grid_position_msg
-      player_choice = gets.to_i
+      player_choice = gets.chomp
     end
     player_choice
   end
 
   def position_verified?(position, grid)
     tokens = get_token_choices.values
-    unless position.between?(36, 42)
-      return grid[position + 7] == %(#{tokens.first} ) || grid[position + 7] == %(#{tokens.last} )
+    unless position.to_i.between?(36, 42)
+      return grid[position.to_i + 7] == %(#{tokens.first} ) || grid[position.to_i + 7] == %(#{tokens.last} )
     else
-      true
+      if position.to_i < 10
+        return grid[position.to_i] == %(0#{position})
+      else
+        return grid[position.to_i] == position
+      end
     end
   end
 

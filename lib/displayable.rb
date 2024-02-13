@@ -24,25 +24,11 @@ module Displayable
     puts
     43.times do |n|
       next if n == 0
-      if n <= 9
-        single_digit_print(grid, n)
-      else
-        double_digit_print(grid, n)
-      end
+      digit_print(grid, n)
     end
   end
 
-  def single_digit_print(grid, num)
-    if (num) % 7 == 0
-      print %( 0#{grid[num]} |\n)
-    elsif (num) % 7 == 1
-      print "|" + %( 0#{grid[num]} |)
-    else
-      print %( 0#{grid[num]} |)
-    end
-  end
-
-  def double_digit_print(grid, num)
+  def digit_print(grid, num)
     if (num) % 7 == 0
       print %( #{grid[num]} |\n)
     elsif (num) % 7 == 1
@@ -61,11 +47,11 @@ module Displayable
   end
 
   def error_msg
-    puts %(Invalid option, try again)
+    puts %(\nInvalid option, try again)
   end
   # TODO: implement rest of the in-game messages
   def replay_msg
-    print %(Would you like to play again? (y/n): )
+    print %(\nWould you like to play again? (y/n): )
   end
 
   def another_round_msg
