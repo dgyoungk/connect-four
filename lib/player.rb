@@ -12,6 +12,6 @@ class Player
   end
 
   def update_token_locations(position)
-    self.placed.push(position)
+    self.placed.push(position.to_i)
   end
 end
